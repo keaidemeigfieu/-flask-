@@ -1,0 +1,11 @@
+__pycache__/
+*.pyc
+.secret_key
+.env
+!.env.example
+.venv/
+venv/
+static/uploads/
+*.db
+*.sqlite
+*.sqlite3

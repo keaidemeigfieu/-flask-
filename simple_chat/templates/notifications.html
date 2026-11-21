@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}通知 · 御宅喵论坛{% endblock %}
+{% block content %}
+<div class="page-head">
+  <h1 class="page-title">🔔 通知</h1>
+</div>
+<div class="card">
+  {% for n in items %}
+  <div class="notif">
+    <div class="notif-text">{{ n.text }}</div>
+    <div class="notif-time">{{ n.created_at.strftime('%Y-%m-%d %H:%M') }}</div>
+    {% if n.type == 'post' %}
+    <a class="notif-link" href="{{ url_for('post_detail', post_id=n.target_id) }}">查看帖子 →</a>
+    {% elif n.type == 'moment' %}
+    <a class="notif-link" href="{{ url_for('moments') }}">查看动态 →</a>
+    {% elif n.type == 'follow' %}
+    <a class="notif-link" href="{{ url_for('user_profile', user_id=n.actor_id) }}">查看主页 →</a>
+    {% endif %}
+  </div>
+  {% else %}
+  <div class="empty">暂无通知</div>
+  {% endfor %}
+</div>
+{% endblock %}

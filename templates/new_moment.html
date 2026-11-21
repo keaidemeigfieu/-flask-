@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}发布动态 · 御宅喵论坛{% endblock %}
+{% block content %}
+<div class="card">
+  <h1 class="page-title" style="margin-bottom:18px;">📝 发布动态</h1>
+  <form method="POST" enctype="multipart/form-data">
+    <div class="field">
+      <textarea name="content" id="content-input" class="textarea" placeholder="分享你的新鲜事..." style="min-height:140px;"></textarea>
+    </div>
+    <div class="field">
+      {% set target = 'content-input' %}{% include '_emoji_picker.html' %}
+    </div>
+    <div class="field">
+      <label class="field-label">添加图片（可多选）</label>
+      <input type="file" name="images" class="image-input" data-preview="#preview" multiple accept="image/*" style="color:var(--ink-soft);">
+      <div class="preview" id="preview"></div>
+    </div>
+    <div class="field">
+      <label class="field-label">添加视频</label>
+      <input type="file" name="video" accept="video/*" style="color:var(--ink-soft);">
+    </div>
+    <div class="compose-bar">
+      <span></span>
+      <button type="submit" class="btn btn-primary">发布</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

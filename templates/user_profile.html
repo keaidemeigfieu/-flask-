@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}{{ target.nickname or target.username }} 的主页 · 御宅喵论坛{% endblock %}
+{% block content %}
+<div class="card profile-card">
+  <span class="avatar avatar-lg">{{ (target.nickname or target.username)[0] }}</span>
+  <div class="profile-info">
+    <h1 class="profile-name">{{ target.nickname or target.username }}</h1>
+    <div class="profile-handle">@{{ target.username }}</div>
+    <div class="profile-stats">
+      <span>关注 <b>{{ following_count }}</b></span>
+      <span>粉丝 <b>{{ follower_count }}</b></span>
+    </div>
+  </div>
+  {% if viewer and viewer.id != target.id %}
+  <div>
+    {% if is_following %}
+    <form method="POST" action="{{ url_for('unfollow', user_id=target.id) }}">
+      <button type="submit" class="btn btn-ghost">已关注 · 取消关注</button>
+    </form>
+    {% else %}
+    <form method="POST" action="{{ url_for('follow', user_id=target.id) }}">
+      <button type="submit" class="btn btn-primary">+ 关注</button>
+    </form>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+<div class="page-head"><h2 class="section-heading">动态</h2></div>
+{% for m in moments %}
+  {% include '_moment_item.html' %}
+{% else %}
+<div class="empty">暂无动态</div>
+{% endfor %}
+
+<div class="page-head"><h2 class="section-heading">帖子</h2></div>
+<div class="card">
+  {% for p in posts %}
+  <a class="post-item" href="{{ url_for('post_detail', post_id=p.id) }}">
+    <span class="post-item-title">{{ p.title }}</span>
+    <span class="post-item-meta">{{ p.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+  </a>
+  {% else %}
+  <div class="empty">暂无帖子</div>
+  {% endfor %}
+</div>
+{% endblock %}

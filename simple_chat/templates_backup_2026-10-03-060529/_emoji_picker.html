@@ -1,0 +1,4 @@
+<button type="button" class="emoji-btn" data-target="{{ target }}" style="background:#f0f0f0; border:1px solid #ddd; border-radius:4px; padding:8px 16px; cursor:pointer; font-size:14px; color:#555;">=ᗜωᗜ= 颜文字</button>
+<div class="emoji-panel" id="emoji-panel-{{ target }}" style="display:none; grid-template-columns:repeat(3, 1fr); gap:2px; background:#fff; border:1px solid #ddd; border-radius:8px; padding:10px; margin-top:8px; box-shadow:0 4px 12px rgba(0,0,0,0.15); max-width:520px;">
+  {% for e in emojis %}<span class="emoji" style="font-size:15px; cursor:pointer; padding:5px 4px; text-align:center; border-radius:4px; white-space:nowrap;">{{ e }}</span>{% endfor %}
+</div>

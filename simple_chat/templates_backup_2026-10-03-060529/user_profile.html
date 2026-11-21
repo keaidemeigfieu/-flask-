@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ target.nickname or target.username }} 的主页 - 御宅喵论坛</title>
+<style>
+body { font-family:"Microsoft YaHei",sans-serif; background:#f5f5f5; margin:0; }
+.container { max-width:700px; margin:0 auto; padding:20px; }
+.card { background:#fff; padding:18px 20px; border-radius:8px; box-shadow:0 1px 3px rgba(0,0,0,0.08); margin-bottom:14px; }
+.profile h1 { margin:0 0 6px 0; color:#333; }
+.profile .meta { color:#999; font-size:14px; }
+.profile .follow-btn { margin-top:12px; }
+.follow-btn button { background:#1a73e8; color:#fff; border:none; padding:8px 20px; border-radius:4px; cursor:pointer; font-size:14px; }
+.follow-btn button.unfollow { background:#fff; color:#1a73e8; border:1px solid #1a73e8; }
+h2 { color:#333; font-size:18px; margin:20px 0 10px; }
+.moment { background:#fff; padding:18px 20px; border-radius:8px; margin-bottom:14px; box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+.moment .meta { color:#999; font-size:13px; margin-bottom:8px; }
+.moment .meta a { color:#1a73e8; text-decoration:none; font-weight:bold; }
+.moment .content { line-height:1.6; white-space:pre-wrap; }
+.moment .imgs { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.moment .imgs img { max-width:200px; max-height:200px; border-radius:6px; cursor:pointer; border:1px solid #eee; object-fit:cover; }
+.moment video { max-width:100%; max-height:320px; border-radius:6px; margin-top:10px; display:block; }
+.post-item { padding:10px 0; border-bottom:1px solid #f0f0f0; }
+.post-item:last-child { border-bottom:none; }
+.post-item a { color:#1a73e8; text-decoration:none; font-weight:bold; }
+.post-item .meta { color:#999; font-size:13px; }
+.empty { color:#999; padding:10px 0; }
+</style>
+</head>
+<body>
+{% include '_nav.html' %}
+<div class="container">
+  <div class="card profile">
+    <h1>{{ target.nickname or target.username }}</h1>
+    <div class="meta">@{{ target.username }} ｜ 关注 {{ following_count }} ｜ 粉丝 {{ follower_count }}</div>
+    {% if viewer and viewer.id != target.id %}
+    <div class="follow-btn">
+      {% if is_following %}
+      <form method="POST" action="{{ url_for('unfollow', user_id=target.id) }}" style="display:inline;">
+        <button type="submit" class="unfollow">已关注 · 取消关注</button>
+      </form>
+      {% else %}
+      <form method="POST" action="{{ url_for('follow', user_id=target.id) }}" style="display:inline;">
+        <button type="submit">+ 关注</button>
+      </form>
+      {% endif %}
+    </div>
+    {% endif %}
+  </div>
+
+  <h2>动态</h2>
+  {% for m in moments %}
+    {% include '_moment_item.html' %}
+  {% else %}
+  <div class="empty">暂无动态</div>
+  {% endfor %}
+
+  <h2>帖子</h2>
+  {% for p in posts %}
+  <div class="card post-item">
+    <a href="{{ url_for('post_detail', post_id=p.id) }}">{{ p.title }}</a>
+    <span class="meta">｜ {{ p.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+  </div>
+  {% else %}
+  <div class="empty">暂无帖子</div>
+  {% endfor %}
+</div>
+</body>
+</html>

@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ post.title }} - 御宅喵论坛</title>
+<style>
+body { font-family:"Microsoft YaHei",sans-serif; background:#f5f5f5; margin:0; }
+.container { max-width:700px; margin:0 auto; padding:20px; }
+.post { background:white; padding:20px; border-radius:8px; margin-bottom:20px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+.post h1 { margin-top:0; color:#333; }
+.post .meta { color:#999; font-size:14px; }
+.post .meta a { color:#1a73e8; text-decoration:none; }
+.post hr { border:none; border-top:1px solid #eee; margin:15px 0; }
+.post p { line-height:1.7; white-space:pre-wrap; }
+.post-images { display:flex; flex-wrap:wrap; gap:8px; margin-top:12px; }
+.post-images img { max-width:200px; max-height:200px; border-radius:6px; object-fit:cover; cursor:pointer; border:1px solid #eee; }
+.post-video video { max-width:100%; max-height:360px; border-radius:6px; margin-top:12px; display:block; }
+.reply-box { background:white; padding:15px 20px; border-radius:8px; margin-bottom:10px; box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+.reply-box .meta { color:#999; font-size:13px; }
+.reply-box p { margin:5px 0 0 0; line-height:1.5; white-space:pre-wrap; }
+.reply-images { display:flex; flex-wrap:wrap; gap:6px; margin-top:8px; }
+.reply-images img { max-width:120px; max-height:120px; border-radius:6px; object-fit:cover; cursor:pointer; border:1px solid #eee; }
+.reply-form { background:white; padding:20px; border-radius:8px; margin-top:20px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+.reply-form textarea { width:100%; padding:10px; box-sizing:border-box; border:1px solid #ddd; border-radius:4px; height:80px; font-size:15px; resize:vertical; }
+.form-bottom { display:flex; justify-content:space-between; align-items:center; margin-top:8px; }
+.upload-btn { background:#f0f0f0; padding:8px 16px; border-radius:4px; cursor:pointer; font-size:14px; color:#555; }
+.reply-form button[type="submit"] { background:#1a73e8; color:white; border:none; padding:10px 25px; border-radius:4px; cursor:pointer; font-size:15px; }
+a { color:#1a73e8; text-decoration:none; }
+a:hover { text-decoration:underline; }
+.back-link { display:block; margin-top:20px; }
+.badge-user { background:#1a73e8; color:white; font-size:11px; padding:1px 8px; border-radius:12px; margin-left:6px; }
+</style>
+</head>
+<body>
+{% include '_nav.html' %}
+<div class="container">
+  <div class="post">
+    <h1>{{ post.title }}</h1>
+    <div class="meta">
+      作者：<a href="{{ url_for('user_profile', user_id=post.author.id) }}">{{ post.author.nickname or post.author.username }}</a>
+      ｜ 发布于：{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
+    </div>
+    <hr>
+    <p>{{ post.content }}</p>
+    {% if post.images %}
+    <div class="post-images">
+      {% for img in post.images.split(',') %}
+      <img src="{{ url_for('static', filename='uploads/' + img) }}" onclick="window.open(this.src)" alt="帖子图片">
+      {% endfor %}
+    </div>
+    {% endif %}
+    {% if post.video %}
+    <div class="post-video">
+      <video controls src="{{ url_for('static', filename='uploads/' + post.video) }}"></video>
+    </div>
+    {% endif %}
+  </div>
+
+  <h3 style="color:#333;">💬 所有回复（{{ post.replies|length }}）</h3>
+  {% for reply in post.replies|sort(attribute='created_at') %}
+  <div class="reply-box">
+    <div class="meta">
+      <strong>{{ reply.author.nickname or reply.author.username }}</strong>
+      <span class="badge-user">注册</span>
+      ｜ {{ reply.created_at.strftime('%Y-%m-%d %H:%M') }}
+    </div>
+    <p>{{ reply.content }}</p>
+    {% if reply.images %}
+    <div class="reply-images">
+      {% for img in reply.images.split(',') %}
+      <img src="{{ url_for('static', filename='uploads/' + img) }}" onclick="window.open(this.src)" alt="回复图片">
+      {% endfor %}
+    </div>
+    {% endif %}
+  </div>
+  {% else %}
+  <p style="color:#999;">还没有回复，抢沙发吧～</p>
+  {% endfor %}
+
+  <div class="reply-form">
+    <h3 style="margin-top:0;">📝 发表回复</h3>
+    <form method="POST" action="{{ url_for('add_reply', post_id=post.id) }}" enctype="multipart/form-data">
+      <textarea name="content" id="reply-content" placeholder="你的回复..."></textarea>
+      <div style="margin-top:8px;">
+        {% set target = 'reply-content' %}{% include '_emoji_picker.html' %}
+      </div>
+      <div class="form-bottom">
+        <label class="upload-btn">
+          📷 图片
+          <input type="file" name="images" multiple accept="image/*" style="display:none;">
+        </label>
+        <button type="submit">发送回复</button>
+      </div>
+    </form>
+  </div>
+
+  <a href="{{ url_for('chat') }}" class="back-link">← 返回首页</a>
+</div>
+<script src="{{ url_for('static', filename='emoji_picker.js') }}"></script>
+</body>
+</html>

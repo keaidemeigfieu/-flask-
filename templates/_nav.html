@@ -1,0 +1,21 @@
+<nav class="nav">
+  <div class="nav-inner">
+    <a href="{{ url_for('chat') }}" class="brand">🐱 御宅喵论坛</a>
+    <div class="nav-links">
+      <a href="{{ url_for('chat') }}" class="nav-link{% if request.endpoint == 'chat' %} active{% endif %}">聊天</a>
+      <a href="{{ url_for('moments') }}" class="nav-link{% if request.endpoint == 'moments' %} active{% endif %}">动态</a>
+      <a href="{{ url_for('new_post') }}" class="nav-link{% if request.endpoint == 'new_post' %} active{% endif %}">发帖</a>
+      <a href="{{ url_for('new_moment') }}" class="nav-link{% if request.endpoint == 'new_moment' %} active{% endif %}">发动态</a>
+      <a href="{{ url_for('search') }}" class="nav-link{% if request.endpoint == 'search' %} active{% endif %}">搜索</a>
+    </div>
+    <span class="nav-spacer"></span>
+    {% if me %}
+      <a href="{{ url_for('user_profile', user_id=me.id) }}" class="nav-link{% if request.endpoint == 'user_profile' and request.view_args.user_id == me.id %} active{% endif %}">{{ me.nickname or me.username }}</a>
+      <a href="{{ url_for('notifications') }}" class="nav-link{% if request.endpoint == 'notifications' %} active{% endif %}">通知{% if unread_count %}<span class="badge">{{ unread_count }}</span>{% endif %}</a>
+      <a href="{{ url_for('logout') }}" class="nav-link nav-link-dim">退出</a>
+    {% else %}
+      <a href="{{ url_for('login') }}" class="nav-link{% if request.endpoint == 'login' %} active{% endif %}">登录</a>
+      <a href="{{ url_for('register') }}" class="nav-link nav-link-cta">注册</a>
+    {% endif %}
+  </div>
+</nav>
