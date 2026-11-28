@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block title %}发布新帖子 · 御宅喵论坛{% endblock %}
+{% block content %}
+<div class="card">
+  <h1 class="page-title" style="margin-bottom:18px;">📝 发布新帖子</h1>
+  <form method="POST" enctype="multipart/form-data" id="post-form">
+    <div class="field">
+      <label class="field-label">标题</label>
+      <input type="text" name="title" class="input" placeholder="输入标题..." required maxlength="200">
+    </div>
+    <div class="field">
+      <label class="field-label">内容</label>
+      <textarea name="content" id="content-input" class="textarea" placeholder="输入内容..." required style="min-height:180px;"></textarea>
+    </div>
+    <div class="field">
+      {% set target = 'content-input' %}{% include '_emoji_picker.html' %}
+    </div>
+    <div class="field">
+      <label class="field-label">添加图片（可多选）</label>
+      <input type="file" name="images" class="image-input" data-preview="#preview" multiple accept="image/*" style="color:var(--ink-soft);">
+      <div class="preview" id="preview"></div>
+    </div>
+    <div class="field">
+      <label class="field-label">添加视频</label>
+      <input type="file" name="video" accept="video/*" style="color:var(--ink-soft);">
+    </div>
+    <div class="compose-bar">
+      <a href="{{ url_for('chat') }}" class="btn btn-ghost">← 返回首页</a>
+      <button type="submit" class="btn btn-primary">发布</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

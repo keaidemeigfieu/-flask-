@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}{{ post.title }} · 御宅喵论坛{% endblock %}
+{% block content %}
+<div class="card">
+  <h1 class="post-title">{{ post.title }}</h1>
+  <div class="post-meta">
+    作者：<a href="{{ url_for('user_profile', user_id=post.author.id) }}">{{ post.author.nickname or post.author.username }}</a>
+    ｜ 发布于 {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
+  </div>
+  <hr class="post-divider">
+  <div class="post-body">{{ post.content }}</div>
+  {% if post.images %}
+  <div class="media-grid">
+    {% for img in post.images.split(',') %}
+    <img src="{{ url_for('static', filename='uploads/' + img) }}" onclick="window.open(this.src)" alt="帖子图片">
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if post.video %}
+  <video class="media-video" controls src="{{ url_for('static', filename='uploads/' + post.video) }}"></video>
+  {% endif %}
+</div>
+
+<div class="page-head" style="margin-top:8px;">
+  <h2 class="section-heading">💬 所有回复（{{ post.replies|length }}）</h2>
+</div>
+
+{% for reply in post.replies|sort(attribute='created_at') %}
+<div class="card reply-item" style="padding:14px 22px;">
+  <div class="reply-head">
+    <span class="avatar">{{ (reply.author.nickname or reply.author.username)[0] }}</span>
+    <span class="reply-nick">{{ reply.author.nickname or reply.author.username }}</span>
+    <span class="pill">注册</span>
+    <span class="reply-time">{{ reply.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+  </div>
+  {% if reply.content %}<div class="reply-body">{{ reply.content }}</div>{% endif %}
+  {% if reply.images %}
+  <div class="media-grid">
+    {% for img in reply.images.split(',') %}
+    <img src="{{ url_for('static', filename='uploads/' + img) }}" onclick="window.open(this.src)" alt="回复图片">
+    {% endfor %}
+  </div>
+  {% endif %}
+</div>
+{% else %}
+<div class="empty">还没有回复，抢沙发吧～</div>
+{% endfor %}
+
+<div class="card" style="margin-top:20px;">
+  {% if me %}
+  <h3 class="section-heading" style="margin:0 0 12px;">📝 发表回复</h3>
+  <form method="POST" action="{{ url_for('add_reply', post_id=post.id) }}" enctype="multipart/form-data" class="compose">
+    <textarea name="content" id="reply-content" class="textarea" placeholder="你的回复..."></textarea>
+    <div class="compose-bar">
+      <div class="compose-left">
+        {% set target = 'reply-content' %}{% include '_emoji_picker.html' %}
+        <label class="upload-btn">📷 图片<input type="file" name="images" multiple accept="image/*" hidden></label>
+      </div>
+      <button type="submit" class="btn btn-primary">发送回复</button>
+    </div>
+  </form>
+  {% else %}
+  <div class="empty">请先 <a href="{{ url_for('login') }}">登录</a> 后参与回复</div>
+  {% endif %}
+</div>
+{% endblock %}

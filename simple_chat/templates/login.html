@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}登录 · 御宅喵论坛{% endblock %}
+{% block content %}
+<div class="auth">
+  <div class="card auth-card">
+    <div class="auth-brand">🐱 御宅喵论坛</div>
+    <h1 class="auth-title">登录</h1>
+    <form method="POST">
+      <div class="field">
+        <input type="text" name="username" class="input" placeholder="用户名" required>
+      </div>
+      <div class="field">
+        <input type="password" name="password" class="input" placeholder="密码" required>
+      </div>
+      <button type="submit" class="btn btn-primary btn-block">登录</button>
+    </form>
+    <div class="auth-alt">
+      还没有账号？<a href="{{ url_for('register') }}">去注册</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

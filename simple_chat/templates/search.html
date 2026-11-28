@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+{% block title %}搜索帖子 · 御宅喵论坛{% endblock %}
+{% block content %}
+<div class="card">
+  <h1 class="page-title" style="margin-bottom:16px;">🔍 搜索帖子</h1>
+  <form method="GET" action="{{ url_for('search') }}" class="search-bar">
+    <input type="text" name="q" class="input" placeholder="输入关键词搜索..." value="{{ query }}">
+    <button type="submit" class="btn btn-primary">搜索</button>
+  </form>
+
+  {% if query %}
+    <p class="search-meta">找到 <strong>{{ results|length }}</strong> 个结果</p>
+    {% for post in results %}
+    <div class="search-result">
+      <h3><a href="{{ url_for('post_detail', post_id=post.id) }}">{{ post.title }}</a></h3>
+      <div class="post-item-meta">
+        作者：{{ post.author.nickname or post.author.username }}
+        ｜ {{ post.created_at.strftime('%Y-%m-%d %H:%M') }}
+        ｜ 回复：{{ post.replies|length }}
+      </div>
+      <p>{{ post.content[:150] }}{% if post.content|length > 150 %}...{% endif %}</p>
+    </div>
+    {% else %}
+    <div class="empty">😅 没有找到相关帖子</div>
+    {% endfor %}
+  {% else %}
+  <div class="empty">💡 输入关键词开始搜索</div>
+  {% endif %}
+</div>
+{% endblock %}

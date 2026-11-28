@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>动态 - 御宅喵论坛</title>
+<style>
+body { font-family:"Microsoft YaHei",sans-serif; background:#f5f5f5; margin:0; }
+.container { max-width:700px; margin:0 auto; padding:20px; }
+.page-head { display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; }
+.page-head h1 { margin:0; color:#333; font-size:22px; }
+.moment { background:#fff; padding:18px 20px; border-radius:8px; margin-bottom:14px; box-shadow:0 1px 3px rgba(0,0,0,0.08); }
+.moment .meta { color:#999; font-size:13px; margin-bottom:8px; }
+.moment .meta a { color:#1a73e8; text-decoration:none; font-weight:bold; }
+.moment .content { line-height:1.6; white-space:pre-wrap; }
+.moment .imgs { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.moment .imgs img { max-width:200px; max-height:200px; border-radius:6px; cursor:pointer; border:1px solid #eee; object-fit:cover; }
+.moment video { max-width:100%; max-height:320px; border-radius:6px; margin-top:10px; display:block; }
+.new-btn { background:#1a73e8; color:#fff; text-decoration:none; padding:8px 16px; border-radius:4px; font-size:14px; }
+.empty { color:#999; text-align:center; padding:40px 0; }
+</style>
+</head>
+<body>
+{% include '_nav.html' %}
+<div class="container">
+  <div class="page-head">
+    <h1>📱 动态</h1>
+    <a href="{{ url_for('new_moment') }}" class="new-btn">+ 发动态</a>
+  </div>
+  {% for m in moments %}
+    {% include '_moment_item.html' %}
+  {% else %}
+  <div class="empty">还没有动态，来发第一条吧～</div>
+  {% endfor %}
+</div>
+</body>
+</html>

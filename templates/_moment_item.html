@@ -1,0 +1,20 @@
+<div class="card feed-item">
+  <div class="feed-head">
+    <a class="avatar" href="{{ url_for('user_profile', user_id=m.author.id) }}">{{ (m.author.nickname or m.author.username)[0] }}</a>
+    <div class="feed-head-meta">
+      <a class="feed-author" href="{{ url_for('user_profile', user_id=m.author.id) }}">{{ m.author.nickname or m.author.username }}</a>
+      <span class="feed-time">{{ m.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+    </div>
+  </div>
+  {% if m.content %}<div class="feed-content">{{ m.content }}</div>{% endif %}
+  {% if m.images %}
+  <div class="media-grid">
+    {% for img in m.images.split(',') %}
+    <img src="{{ url_for('static', filename='uploads/' + img) }}" onclick="window.open(this.src)" alt="动态图片">
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if m.video %}
+  <video class="media-video" controls src="{{ url_for('static', filename='uploads/' + m.video) }}"></video>
+  {% endif %}
+</div>

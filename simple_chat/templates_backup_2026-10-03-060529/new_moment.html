@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>发布动态 - 御宅喵论坛</title>
+<style>
+body { font-family:"Microsoft YaHei",sans-serif; background:#f5f5f5; margin:0; }
+.container { max-width:700px; margin:0 auto; padding:20px; }
+.card { background:#fff; padding:24px; border-radius:8px; box-shadow:0 2px 5px rgba(0,0,0,0.1); }
+h1 { color:#333; margin-top:0; }
+label { font-weight:bold; display:block; margin-top:15px; }
+textarea { width:100%; padding:10px; border:1px solid #ddd; border-radius:4px; box-sizing:border-box; font-size:15px; height:140px; resize:vertical; }
+.upload-btn { display:inline-block; background:#f0f0f0; padding:10px 20px; border-radius:4px; cursor:pointer; font-size:14px; color:#555; }
+.form-bottom { display:flex; justify-content:space-between; align-items:center; margin-top:16px; }
+button[type=submit] { background:#1a73e8; color:#fff; border:none; padding:12px 30px; border-radius:4px; cursor:pointer; font-size:16px; }
+.preview { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.preview img { max-width:100px; max-height:100px; border-radius:6px; border:1px solid #eee; }
+a { color:#1a73e8; text-decoration:none; }
+</style>
+</head>
+<body>
+{% include '_nav.html' %}
+<div class="container">
+  <div class="card">
+    <h1>📝 发布动态</h1>
+    <form method="POST" enctype="multipart/form-data">
+      <textarea name="content" id="content-input" placeholder="分享你的新鲜事..."></textarea>
+      <div style="margin-top:10px;">
+        {% set target = 'content-input' %}{% include '_emoji_picker.html' %}
+      </div>
+      <label>添加图片（可多选）</label>
+      <input type="file" name="images" id="image-input" multiple accept="image/*">
+      <div class="preview" id="preview"></div>
+      <label>添加视频</label>
+      <input type="file" name="video" id="video-input" accept="video/*">
+      <div class="form-bottom">
+        <span></span>
+        <button type="submit">发布</button>
+      </div>
+    </form>
+  </div>
+</div>
+<script src="{{ url_for('static', filename='emoji_picker.js') }}"></script>
+<script>
+document.getElementById('image-input').addEventListener('change', function(e) {
+  var preview = document.getElementById('preview');
+  preview.innerHTML = '';
+  for (const file of e.target.files) {
+    const reader = new FileReader();
+    reader.onload = function(ev) {
+      const img = document.createElement('img');
+      img.src = ev.target.result;
+      preview.appendChild(img);
+    };
+    reader.readAsDataURL(file);
+  }
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+<div class="moment">
+  <div class="meta">
+    <a href="{{ url_for('user_profile', user_id=m.author.id) }}">{{ m.author.nickname or m.author.username }}</a>
+    ｜ {{ m.created_at.strftime('%Y-%m-%d %H:%M') }}
+  </div>
+  <div class="content">{{ m.content }}</div>
+  {% if m.images %}
+  <div class="imgs">
+    {% for img in m.images.split(',') %}
+    <img src="{{ url_for('static', filename='uploads/' + img) }}" onclick="window.open(this.src)" alt="动态图片">
+    {% endfor %}
+  </div>
+  {% endif %}
+  {% if m.video %}
+  <video controls src="{{ url_for('static', filename='uploads/' + m.video) }}"></video>
+  {% endif %}
+</div>
