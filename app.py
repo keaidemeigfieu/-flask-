@@ -82,6 +82,16 @@ def save_uploaded_video(file):
         return filename
     return None
 
+def save_avatar(file):
+    """保存头像文件，返回文件名；无效或为空返回 None"""
+    if file and file.filename and allowed_file(file.filename):
+        filename = secure_filename(file.filename)
+        filename = f"avatar_{int(time.time())}_{filename}"
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        return filename
+    return None
+
 db = SQLAlchemy(app)
 migrate = Migrate(app, db)
 
@@ -93,11 +103,13 @@ class User(db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     password = db.Column(db.String(200), nullable=False)
     nickname = db.Column(db.String(80))
+    avatar = db.Column(db.String(200))  # 头像文件名（存 static/uploads）
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
     posts = db.relationship('Post', backref='author', lazy=True)
     replies = db.relationship('Reply', backref='author', lazy=True)
     moments = db.relationship('Moment', backref='author', lazy=True)
+    moment_comments = db.relationship('MomentComment', backref='author', lazy=True)
 
 class Post(db.Model):
     __tablename__ = 'posts'
@@ -129,6 +141,18 @@ class Moment(db.Model):
     video = db.Column(db.String(200))  # 视频文件名
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    comments = db.relationship('MomentComment', backref='moment', lazy=True,
+                               cascade='all, delete-orphan',
+                               order_by='MomentComment.created_at')
+
+class MomentComment(db.Model):
+    """动态评论"""
+    __tablename__ = 'moment_comments'
+    id = db.Column(db.Integer, primary_key=True)
+    content = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    moment_id = db.Column(db.Integer, db.ForeignKey('moments.id'), nullable=False)
 
 class Follow(db.Model):
     """关注关系：follower 关注 followed"""
@@ -216,49 +240,11 @@ def inject_globals():
 
 # ==================== 路由 ====================
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def chat():
-    messages = load_messages()
-
-    if 'username' in session:
-        current_user = session['username']
-        user_type = 'registered'
-        user = User.query.filter_by(username=current_user).first()
-        nickname = (user.nickname if user and user.nickname else current_user)
-    else:
-        ip = request.remote_addr
-        nickname = get_user_by_ip(ip)
-        current_user = None
-        user_type = 'guest'
-
-    if request.method == 'POST':
-        content = request.form.get('content', '').strip()
-        files = request.files.getlist('images')
-
-        if content or any(f and f.filename for f in files):
-            image_filenames = save_uploaded_images(files)
-
-            messages.append({
-                'nickname': nickname,
-                'content': content,
-                'images': image_filenames,
-                'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
-                'user_type': user_type,
-                'user_id': current_user if current_user else ip
-            })
-            save_messages(messages)
-
-        return redirect(url_for('chat'))
-
-    messages.reverse()
+    """大厅：只显示帖子列表，其他什么都不显示"""
     posts = Post.query.order_by(Post.created_at.desc()).all()
-
-    return render_template('chat.html',
-                         messages=messages,
-                         nickname=nickname,
-                         user_type=user_type,
-                         current_user=current_user,
-                         posts=posts)
+    return render_template('chat.html', posts=posts)
 
 @app.route('/register', methods=['GET', 'POST'])
 def register():
@@ -383,15 +369,11 @@ def search():
 
 @app.route('/moments')
 def moments():
-    """动态流：登录用户看到关注者 + 自己的动态，未登录看到全部"""
+    """动态已移到个人主页，重定向到自己的主页"""
     me = current_user_obj()
     if me:
-        followed_ids = [f.followed_id for f in Follow.query.filter_by(follower_id=me.id).all()]
-        feed_ids = followed_ids + [me.id]
-        feed = Moment.query.filter(Moment.user_id.in_(feed_ids)).order_by(Moment.created_at.desc()).all()
-    else:
-        feed = Moment.query.order_by(Moment.created_at.desc()).all()
-    return render_template('moments.html', moments=feed)
+        return redirect(url_for('user_profile', user_id=me.id))
+    return redirect(url_for('login'))
 
 @app.route('/moment/new', methods=['GET', 'POST'])
 def new_moment():
@@ -419,7 +401,7 @@ def new_moment():
         db.session.add(moment)
         db.session.commit()
         notify_followers(user, 'moment', moment.id, f"{user.nickname or user.username} 发布了新动态")
-        return redirect(url_for('moments'))
+        return redirect(url_for('user_profile', user_id=user.id))
 
     return render_template('new_moment.html')
 
@@ -429,17 +411,24 @@ def new_moment():
 def user_profile(user_id):
     target = User.query.get_or_404(user_id)
     viewer = current_user_obj()
-    user_moments = Moment.query.filter_by(user_id=user_id).order_by(Moment.created_at.desc()).all()
-    user_posts = Post.query.filter_by(user_id=user_id).order_by(Post.created_at.desc()).all()
+    is_self = viewer is not None and viewer.id == target.id
+    is_following = False
+    if viewer and not is_self:
+        is_following = Follow.query.filter_by(follower_id=viewer.id, followed_id=user_id).first() is not None
     follower_count = Follow.query.filter_by(followed_id=user_id).count()
     following_count = Follow.query.filter_by(follower_id=user_id).count()
-    is_following = False
-    if viewer and viewer.id != user_id:
-        is_following = Follow.query.filter_by(follower_id=viewer.id, followed_id=user_id).first() is not None
+    # 隐私：只有本人或关注了 target 的人才能看到 target 的动态
+    can_view_moments = is_self or is_following
+    moments = []
+    if can_view_moments:
+        moments = Moment.query.filter_by(user_id=user_id).order_by(Moment.created_at.desc()).all()
+    user_posts = Post.query.filter_by(user_id=user_id).order_by(Post.created_at.desc()).all()
     return render_template('user_profile.html',
                            target=target,
                            viewer=viewer,
-                           moments=user_moments,
+                           is_self=is_self,
+                           moments=moments,
+                           can_view_moments=can_view_moments,
                            posts=user_posts,
                            is_following=is_following,
                            follower_count=follower_count,
@@ -475,6 +464,41 @@ def unfollow(user_id):
         db.session.delete(follow)
         db.session.commit()
     return redirect(url_for('user_profile', user_id=user_id))
+
+@app.route('/user/<int:user_id>/edit', methods=['GET', 'POST'])
+def edit_profile(user_id):
+    """编辑资料：昵称 + 头像（仅本人）"""
+    viewer = current_user_obj()
+    if not viewer or viewer.id != user_id:
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        nickname = request.form.get('nickname', '').strip()
+        avatar_file = request.files.get('avatar')
+        if nickname:
+            viewer.nickname = nickname
+        avatar = save_avatar(avatar_file)
+        if avatar:
+            viewer.avatar = avatar
+        db.session.commit()
+        return redirect(url_for('user_profile', user_id=user_id))
+    return render_template('edit_profile.html', target=viewer)
+
+@app.route('/moment/<int:moment_id>/comment', methods=['POST'])
+def add_moment_comment(moment_id):
+    """给动态发评论：仅本人或关注了动态作者的人可评论"""
+    viewer = current_user_obj()
+    if not viewer:
+        return redirect(url_for('login'))
+    moment = Moment.query.get_or_404(moment_id)
+    if moment.user_id != viewer.id:
+        if not Follow.query.filter_by(follower_id=viewer.id, followed_id=moment.user_id).first():
+            return '关注后才能评论', 403
+    content = request.form.get('content', '').strip()
+    if not content:
+        return redirect(url_for('user_profile', user_id=moment.user_id))
+    db.session.add(MomentComment(content=content, user_id=viewer.id, moment_id=moment_id))
+    db.session.commit()
+    return redirect(url_for('user_profile', user_id=moment.user_id))
 
 # ==================== 通知 ====================
 

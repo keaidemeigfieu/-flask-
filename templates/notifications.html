@@ -12,7 +12,7 @@
     {% if n.type == 'post' %}
     <a class="notif-link" href="{{ url_for('post_detail', post_id=n.target_id) }}">查看帖子 →</a>
     {% elif n.type == 'moment' %}
-    <a class="notif-link" href="{{ url_for('moments') }}">查看动态 →</a>
+    <a class="notif-link" href="{{ url_for('user_profile', user_id=n.actor_id) }}">查看主页 →</a>
     {% elif n.type == 'follow' %}
     <a class="notif-link" href="{{ url_for('user_profile', user_id=n.actor_id) }}">查看主页 →</a>
     {% endif %}

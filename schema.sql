@@ -27,6 +27,18 @@ CREATE TABLE follows (
     CONSTRAINT fk_follows_followed FOREIGN KEY (followed_id) REFERENCES users (id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+-- 动态评论表
+CREATE TABLE moment_comments (
+    id INT NOT NULL AUTO_INCREMENT,
+    content TEXT NOT NULL,
+    created_at DATETIME,
+    user_id INT NOT NULL,
+    moment_id INT NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT fk_mc_user FOREIGN KEY (user_id) REFERENCES users (id),
+    CONSTRAINT fk_mc_moment FOREIGN KEY (moment_id) REFERENCES moments (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
 -- 通知表
 CREATE TABLE notifications (
     id INT NOT NULL AUTO_INCREMENT,
@@ -44,3 +56,6 @@ CREATE TABLE notifications (
 
 -- posts 表增加视频字段
 ALTER TABLE posts ADD COLUMN video VARCHAR(200);
+
+-- users 表加头像字段
+ALTER TABLE users ADD COLUMN avatar VARCHAR(200);

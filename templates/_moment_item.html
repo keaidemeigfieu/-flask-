@@ -1,6 +1,12 @@
 <div class="card feed-item">
   <div class="feed-head">
-    <a class="avatar" href="{{ url_for('user_profile', user_id=m.author.id) }}">{{ (m.author.nickname or m.author.username)[0] }}</a>
+    <a href="{{ url_for('user_profile', user_id=m.author.id) }}">
+      {% if m.author.avatar %}
+      <img class="avatar" src="{{ url_for('static', filename='uploads/' + m.author.avatar) }}" alt="头像">
+      {% else %}
+      <span class="avatar">{{ (m.author.nickname or m.author.username)[0] }}</span>
+      {% endif %}
+    </a>
     <div class="feed-head-meta">
       <a class="feed-author" href="{{ url_for('user_profile', user_id=m.author.id) }}">{{ m.author.nickname or m.author.username }}</a>
       <span class="feed-time">{{ m.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
@@ -17,4 +23,28 @@
   {% if m.video %}
   <video class="media-video" controls src="{{ url_for('static', filename='uploads/' + m.video) }}"></video>
   {% endif %}
+
+  <div class="comment-section">
+    <div class="comment-head">💬 评论（{{ m.comments|length }}）</div>
+    {% for c in m.comments %}
+    <div class="comment-item">
+      {% if c.author.avatar %}
+      <img class="avatar avatar-sm" src="{{ url_for('static', filename='uploads/' + c.author.avatar) }}" alt="头像">
+      {% else %}
+      <span class="avatar avatar-sm">{{ (c.author.nickname or c.author.username)[0] }}</span>
+      {% endif %}
+      <div class="comment-body">
+        <span class="comment-author">{{ c.author.nickname or c.author.username }}</span>
+        <span class="comment-content">{{ c.content }}</span>
+        <span class="comment-time">{{ c.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+      </div>
+    </div>
+    {% endfor %}
+    {% if me %}
+    <form method="POST" action="{{ url_for('add_moment_comment', moment_id=m.id) }}" class="comment-form">
+      <input type="text" name="content" class="input" placeholder="写下你的评论..." required>
+      <button type="submit" class="btn btn-primary btn-sm">评论</button>
+    </form>
+    {% endif %}
+  </div>
 </div>

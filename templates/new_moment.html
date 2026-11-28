@@ -20,7 +20,7 @@
       <input type="file" name="video" accept="video/*" style="color:var(--ink-soft);">
     </div>
     <div class="compose-bar">
-      <span></span>
+      <a href="{{ url_for('user_profile', user_id=me.id) }}" class="btn btn-ghost">← 返回主页</a>
       <button type="submit" class="btn btn-primary">发布</button>
     </div>
   </form>

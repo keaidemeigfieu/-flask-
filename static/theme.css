@@ -186,6 +186,8 @@ img, video { max-width: 100%; }
   box-shadow: var(--glow-grad);
 }
 .avatar-lg { width: 64px; height: 64px; font-size: 26px; }
+.avatar-sm { width: 24px; height: 24px; font-size: 11px; }
+img.avatar { object-fit: cover; background: var(--surface-3); }
 
 /* ---------- 按钮 ---------- */
 .btn {
@@ -358,6 +360,18 @@ img, video { max-width: 100%; }
 .profile-handle { color: var(--ink-mute); font-size: 13px; margin-top: 2px; }
 .profile-stats { display: flex; gap: 18px; margin-top: 8px; color: var(--ink-soft); font-size: 13px; }
 .profile-stats b { color: var(--ink); }
+.profile-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+/* ---------- 动态评论 ---------- */
+.comment-section { margin-top: 14px; border-top: 1px solid var(--border); padding-top: 12px; }
+.comment-head { color: var(--ink-mute); font-size: 13px; margin-bottom: 10px; }
+.comment-item { display: flex; align-items: flex-start; gap: 8px; margin-bottom: 10px; }
+.comment-body { display: flex; flex-direction: column; line-height: 1.5; min-width: 0; }
+.comment-author { color: var(--pink); font-weight: 700; font-size: 13px; }
+.comment-content { word-break: break-word; white-space: pre-wrap; }
+.comment-time { color: var(--ink-mute); font-size: 11px; }
+.comment-form { display: flex; gap: 8px; margin-top: 10px; }
+.comment-form .input { flex: 1; }
 
 /* ---------- 通知 ---------- */
 .notif { padding: 14px 0; border-bottom: 1px solid var(--border); }
