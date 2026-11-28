@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block title %}编辑资料 · 御宅喵论坛{% endblock %}
+{% block content %}
+<div class="card">
+  <h1 class="page-title" style="margin-bottom:18px;">✏️ 编辑资料</h1>
+  <form method="POST" enctype="multipart/form-data">
+    <div class="field">
+      <label class="field-label">头像</label>
+      {% if target.avatar %}
+      <img class="avatar avatar-lg" src="{{ url_for('static', filename='uploads/' + target.avatar) }}" alt="当前头像" style="margin-bottom:10px;">
+      {% else %}
+      <span class="avatar avatar-lg">{{ (target.nickname or target.username)[0] }}</span>
+      {% endif %}
+      <div style="margin-top:10px;">
+        <input type="file" name="avatar" accept="image/*" style="color:var(--ink-soft);">
+      </div>
+    </div>
+    <div class="field">
+      <label class="field-label">昵称</label>
+      <input type="text" name="nickname" class="input" value="{{ target.nickname or target.username }}" maxlength="80">
+    </div>
+    <div class="compose-bar">
+      <a href="{{ url_for('user_profile', user_id=target.id) }}" class="btn btn-ghost">← 返回主页</a>
+      <button type="submit" class="btn btn-primary">保存</button>
+    </div>
+  </form>
+</div>
+{% endblock %}

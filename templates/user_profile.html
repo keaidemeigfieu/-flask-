@@ -2,7 +2,11 @@
 {% block title %}{{ target.nickname or target.username }} 的主页 · 御宅喵论坛{% endblock %}
 {% block content %}
 <div class="card profile-card">
+  {% if target.avatar %}
+  <img class="avatar avatar-lg" src="{{ url_for('static', filename='uploads/' + target.avatar) }}" alt="头像">
+  {% else %}
   <span class="avatar avatar-lg">{{ (target.nickname or target.username)[0] }}</span>
+  {% endif %}
   <div class="profile-info">
     <h1 class="profile-name">{{ target.nickname or target.username }}</h1>
     <div class="profile-handle">@{{ target.username }}</div>
@@ -11,29 +15,38 @@
       <span>粉丝 <b>{{ follower_count }}</b></span>
     </div>
   </div>
-  {% if viewer and viewer.id != target.id %}
-  <div>
-    {% if is_following %}
-    <form method="POST" action="{{ url_for('unfollow', user_id=target.id) }}">
-      <button type="submit" class="btn btn-ghost">已关注 · 取消关注</button>
-    </form>
+  <div class="profile-actions">
+    {% if is_self %}
+      <a href="{{ url_for('edit_profile', user_id=target.id) }}" class="btn btn-ghost btn-sm">✏️ 编辑资料</a>
+      <a href="{{ url_for('new_moment') }}" class="btn btn-primary btn-sm">+ 发动态</a>
+    {% elif viewer %}
+      {% if is_following %}
+      <form method="POST" action="{{ url_for('unfollow', user_id=target.id) }}">
+        <button type="submit" class="btn btn-ghost btn-sm">已关注 · 取消关注</button>
+      </form>
+      {% else %}
+      <form method="POST" action="{{ url_for('follow', user_id=target.id) }}">
+        <button type="submit" class="btn btn-primary btn-sm">+ 关注</button>
+      </form>
+      {% endif %}
     {% else %}
-    <form method="POST" action="{{ url_for('follow', user_id=target.id) }}">
-      <button type="submit" class="btn btn-primary">+ 关注</button>
-    </form>
+      <a href="{{ url_for('login') }}" class="btn btn-primary btn-sm">登录后关注</a>
     {% endif %}
   </div>
-  {% endif %}
 </div>
 
-<div class="page-head"><h2 class="section-heading">动态</h2></div>
-{% for m in moments %}
-  {% include '_moment_item.html' %}
+<div class="page-head"><h2 class="section-heading">📱 动态</h2></div>
+{% if can_view_moments %}
+  {% for m in moments %}
+    {% include '_moment_item.html' %}
+  {% else %}
+  <div class="card"><div class="empty">还没有动态，发第一条吧～</div></div>
+  {% endfor %}
 {% else %}
-<div class="empty">暂无动态</div>
-{% endfor %}
+<div class="card"><div class="empty">🔒 关注后才能查看 TA 的动态</div></div>
+{% endif %}
 
-<div class="page-head"><h2 class="section-heading">帖子</h2></div>
+<div class="page-head"><h2 class="section-heading">📚 帖子</h2></div>
 <div class="card">
   {% for p in posts %}
   <a class="post-item" href="{{ url_for('post_detail', post_id=p.id) }}">

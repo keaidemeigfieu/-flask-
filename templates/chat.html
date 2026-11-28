@@ -1,60 +1,16 @@
 {% extends 'base.html' %}
-{% block title %}御宅喵论坛 · 聊天{% endblock %}
+{% block title %}大厅 · 御宅喵论坛{% endblock %}
 {% block content %}
-<section class="card">
-  <div class="section-title">
-    <h1 class="page-title">聊天广场</h1>
-    <span class="section-sub">宅腐不分家喵 =ᗜωᗜ=</span>
-  </div>
-  <div class="msg-list">
-    {% for msg in messages %}
-    <div class="msg">
-      <div class="msg-head">
-        <span class="avatar">{{ (msg.nickname or '喵')[0] }}</span>
-        <span class="msg-nick">{{ msg.nickname }}</span>
-        {% if msg.user_type == 'registered' %}<span class="pill">注册</span>{% endif %}
-        <span class="msg-time">{{ msg.time }}</span>
-      </div>
-      {% if msg.content %}<div class="msg-body">{{ msg.content }}</div>{% endif %}
-      {% if msg.images %}
-      <div class="media-grid">
-        {% for img in msg.images %}
-        <img src="{{ url_for('static', filename='uploads/' + img) }}" onclick="window.open(this.src)" alt="消息图片">
-        {% endfor %}
-      </div>
-      {% endif %}
-    </div>
-    {% else %}
-    <div class="empty">还没有消息，来聊两句吧～</div>
-    {% endfor %}
-  </div>
-</section>
-
-<section class="card">
-  <form method="POST" enctype="multipart/form-data" class="compose">
-    <textarea name="content" id="chat-content" class="textarea" placeholder="输入消息，说点什么吧…"></textarea>
-    <div class="compose-bar">
-      <div class="compose-left">
-        {% set target = 'chat-content' %}{% include '_emoji_picker.html' %}
-        <label class="upload-btn">📷 图片<input type="file" name="images" multiple accept="image/*" hidden></label>
-      </div>
-      <button type="submit" class="btn btn-primary">发送</button>
-    </div>
-  </form>
-</section>
-
-<section class="card">
-  <div class="section-title">
-    <h2 class="section-heading">📚 帖子</h2>
-    <a href="{{ url_for('new_post') }}" class="btn btn-ghost btn-sm">+ 发帖</a>
-  </div>
-  {% for p in posts %}
-  <a class="post-item" href="{{ url_for('post_detail', post_id=p.id) }}">
-    <span class="post-item-title">{{ p.title }}</span>
-    <span class="post-item-meta">{{ p.created_at.strftime('%Y-%m-%d %H:%M') }} · {{ p.replies|length }} 回复</span>
-  </a>
-  {% else %}
-  <div class="empty">暂无帖子</div>
-  {% endfor %}
-</section>
+<div class="page-head">
+  <h1 class="page-title">📚 大厅</h1>
+  <a href="{{ url_for('new_post') }}" class="btn btn-primary">+ 发帖</a>
+</div>
+{% for p in posts %}
+<a class="post-item" href="{{ url_for('post_detail', post_id=p.id) }}">
+  <span class="post-item-title">{{ p.title }}</span>
+  <span class="post-item-meta">{{ p.created_at.strftime('%Y-%m-%d %H:%M') }} · {{ p.replies|length }} 回复</span>
+</a>
+{% else %}
+<div class="empty">暂无帖子</div>
+{% endfor %}
 {% endblock %}
